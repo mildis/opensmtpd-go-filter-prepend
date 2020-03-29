@@ -7,7 +7,6 @@ import (
 	"log"
 	"mime"
 	"os"
-	"runtime"
 	"strings"
 )
 
@@ -20,8 +19,6 @@ func init() {
 }
 
 func main() {
-	runtime.GOMAXPROCS(1)
-
 	scanner := bufio.NewScanner(os.Stdin)
 	dec = new(mime.WordDecoder)
 
