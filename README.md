@@ -1,3 +1,5 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mildis_opensmtpd-go-filter-prepend&metric=alert_status)](https://sonarcloud.io/dashboard?id=mildis_opensmtpd-go-filter-prepend)
+
 # opensmtpd-go-filter-prepend
 OpenSMTPD filter which prepends a string on email's subject if not present
 
