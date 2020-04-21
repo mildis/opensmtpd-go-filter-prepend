@@ -13,8 +13,8 @@ listen on em0 tls pki "*" filter { senderscore, rspamd, prepend }
 ```
 * default prefix is `[*EXT*]` if not specified on the CLI  
 Be warned that a too generic prefix could match legitimate wording and thus it won't be added to the Subject
+* option `--encode` forces prefix encoding whether the subject is encoded or not.
 
 ## Known limitations
 1. if Subject is too long and spans between multiple datalines, only the begining will be analyzed for prefix token
 2. RFC2047 Subject won't be decoded if 1/ happens inside an encoded string
-3. for RFC2047 Subject, the rewrote Subject line will be a mix of the prefix in clear ASCII and the encoded original subject
