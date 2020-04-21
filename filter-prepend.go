@@ -13,9 +13,11 @@ import (
 var dec *mime.WordDecoder
 var prefix string
 var encprefix string
+var forceEncode bool
 
 func init() {
 	flag.StringVar(&prefix, "prefix", "[*EXT*]", "Prepend subject with <prefix> if not already present")
+	flag.BoolVar(&forceEncode, "encode", false, "Encode prefix whether subject is encoded or not")
 	flag.Parse()
 }
 
@@ -75,7 +77,7 @@ func processSubject(s []string) string {
 	}
 
 	if !strings.Contains(subject, prefix) {
-		if isEncoded {
+		if isEncoded || forceEncode {
 			result = encprefix + " "
 		} else {
 			result = prefix + " "
