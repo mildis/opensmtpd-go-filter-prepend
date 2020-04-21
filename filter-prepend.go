@@ -12,6 +12,7 @@ import (
 
 var dec *mime.WordDecoder
 var prefix string
+var encprefix string
 
 func init() {
 	flag.StringVar(&prefix, "prefix", "[*EXT*]", "Prepend subject with <prefix> if not already present")
@@ -21,6 +22,7 @@ func init() {
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	dec = new(mime.WordDecoder)
+	encprefix = mime.QEncoding.Encode("utf-8", prefix)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -61,17 +63,23 @@ func doDataLine(dataSplit []string) {
 func processSubject(s []string) string {
 	result := ""
 	subject := ""
+	isEncoded := false
 
 	rawsub := strings.SplitAfterN(strings.Join(s, "|"), ": ", 2)[1]
 
 	if len(rawsub) < 8 || !strings.HasPrefix(rawsub, "=?") || !strings.HasSuffix(rawsub, "?=") || strings.Count(rawsub, "?") != 4 {
 		subject = rawsub
 	} else {
+		isEncoded = true
 		subject, _ = dec.Decode(rawsub)
 	}
 
 	if !strings.Contains(subject, prefix) {
-		result = prefix + " "
+		if isEncoded {
+			result = encprefix + " "
+		} else {
+			result = prefix + " "
+		}
 	}
 
 	return "Subject: " + result + rawsub
