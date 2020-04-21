@@ -31,7 +31,10 @@ func main() {
 
 		if strings.HasPrefix(line, "config|ready") {
 			registerFilter()
-			log.Println("filter add-ext registered with " + prefix)
+			log.Println("filter-prepend registered with " + prefix)
+			if forceEncode {
+				log.Println("filter-prepend will always encode prefix to " + encprefix)
+			}
 		} else {
 			dataSplit := strings.Split(line, "|")
 			if len(dataSplit) >= 8 {
