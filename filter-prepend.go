@@ -30,7 +30,7 @@ func main() {
 		line := scanner.Text()
 
 		if strings.HasPrefix(line, "config|ready") {
-			registerFilter()
+			RegisterFilter()
 			log.Println("filter-prepend registered with " + prefix)
 			if forceEncode {
 				log.Println("filter-prepend will always encode prefix to " + encprefix)
@@ -39,7 +39,7 @@ func main() {
 			dataSplit := strings.Split(line, "|")
 			if len(dataSplit) >= 8 {
 				if dataSplit[4] == "data-line" {
-					doDataLine(dataSplit)
+					DoDataLine(dataSplit)
 				}
 			}
 		}
@@ -50,22 +50,22 @@ func main() {
 	}
 }
 
-func registerFilter() {
+func RegisterFilter() {
 	fmt.Println("register|filter|smtp-in|data-line")
 	fmt.Println("register|report|smtp-in|link-disconnect")
 	fmt.Println("register|report|smtp-in|link-connect")
 	fmt.Println("register|ready")
 }
 
-func doDataLine(dataSplit []string) {
+func DoDataLine(dataSplit []string) {
 	if strings.HasPrefix(strings.ToUpper(dataSplit[7]), "SUBJECT: ") {
-		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[6], dataSplit[5], processSubject(dataSplit[7:]))
+		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[5], dataSplit[6], ProcessSubject(dataSplit[7:]))
 	} else {
-		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[6], dataSplit[5], strings.Join(dataSplit[7:], "|"))
+		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[5], dataSplit[6], strings.Join(dataSplit[7:], "|"))
 	}
 }
 
-func processSubject(s []string) string {
+func ProcessSubject(s []string) string {
 	result := ""
 	subject := ""
 	isEncoded := false
