@@ -14,6 +14,8 @@ var dec *mime.WordDecoder
 var prefix string
 var encprefix string
 var forceEncode bool
+var sessionIndex int
+var opaqueIndex int
 
 func init() {
 	flag.StringVar(&prefix, "prefix", "[*EXT*]", "Prepend subject with <prefix> if not already present")
@@ -29,7 +31,9 @@ func main() {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		if strings.HasPrefix(line, "config|ready") {
+		if strings.HasPrefix(line, "config|smtpd-version") {
+			SetIndexValue(line)
+		} else if strings.HasPrefix(line, "config|ready") {
 			RegisterFilter()
 			log.Println("filter-prepend registered with " + prefix)
 			if forceEncode {
@@ -50,6 +54,18 @@ func main() {
 	}
 }
 
+func SetIndexValue(line string) {
+	version := strings.Split(line, "|")[2]
+	if strings.HasPrefix(version, "6.6.") {
+		sessionIndex = 6
+		opaqueIndex = 5
+		log.Println("smtpd 6.6 detected : swapping session and opaque indices.")
+	} else {
+		sessionIndex = 5
+		opaqueIndex = 6
+	}
+}
+
 func RegisterFilter() {
 	fmt.Println("register|filter|smtp-in|data-line")
 	fmt.Println("register|report|smtp-in|link-disconnect")
@@ -59,9 +75,9 @@ func RegisterFilter() {
 
 func DoDataLine(dataSplit []string) {
 	if strings.HasPrefix(strings.ToUpper(dataSplit[7]), "SUBJECT: ") {
-		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[5], dataSplit[6], ProcessSubject(dataSplit[7:]))
+		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[sessionIndex], dataSplit[opaqueIndex], ProcessSubject(dataSplit[7:]))
 	} else {
-		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[5], dataSplit[6], strings.Join(dataSplit[7:], "|"))
+		fmt.Printf("filter-dataline|%s|%s|%s\n", dataSplit[sessionIndex], dataSplit[opaqueIndex], strings.Join(dataSplit[7:], "|"))
 	}
 }
 
