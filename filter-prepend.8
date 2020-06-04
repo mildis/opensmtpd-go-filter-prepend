@@ -1,0 +1,74 @@
+.\" Copyright (C) 2020 Mildis <me@mildis.org>
+.\" All rights reserved.
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.Dd June 04, 2020
+.Dt FILTER-PREPEND 8
+.Os
+.Sh NAME
+.Nm filter-prepend
+.Nd OpenSMTPD filter which prepends token to subject if not present
+.Sh SYNOPSIS
+.Nm filter-prepend
+.Op Fl prefix Ar string
+.Op Fl encode
+.Sh DESCRIPTION
+The
+.Nm
+filter for the OpenSMTPD
+.Pq Xr smtpd 8
+server prepends a string token to the mail's subject if not already present.
+Its options are:
+.Bl -tag -width "encode" -offset indent
+.It Fl prefix Ar string
+Use
+.Ar string
+as the token to search and add.
+The default is
+.Ar [*EXT*] .
+.It Fl encode
+Always encode the token in the subject, whether the incoming subject is encoded or not.
+The default is
+.Ar false .
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+Adding the following to
+.Pa smtpd.conf
+enables
+.Nm
+for all incoming connections, changes the default prefix to
+.Em '[EXTERNAL]'
+and forcibly encodes it.
+.Pp
+Be warned that a too generic prefix could match legitimate wording and thus it won't be added to the Subject.
+.Bd -literal -offset indent
+filter "prepend" proc-exec \\
+       "/usr/local/libexec/smtpd/filter-prepend \\
+	-prefix '[EXTERNAL]' -encode"
+
+listen on all filter "prepend"
+.Ed
+.Sh KNOWN LIMITATIONS
+.Bl -dash
+.It
+If Subject is too long and spans between multiple datalines, only the begining will be analyzed for prefix token
+.It
+RFC2047 Subject won't be decoded if 1/ happens inside an encoded string
+.El
+.Sh SEE ALSO
+.Xr smtpd.conf 5
+.Sh AUTHORS
+.An Mildis Aq Mt me@mildis.org
+.Sh BUGS
+None known.
