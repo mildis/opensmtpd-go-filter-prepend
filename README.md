@@ -9,10 +9,11 @@ Works with OpenSMTPD 6.6 and 6.7.
 `env GOOS=openbsd GOARCH=amd64 go build filter-prepend.go`
 * make OpenSMTPD use the filter
 ```
-filter prepend proc-exec "filter-prepend-go --prefix='[*EXT*]'"
+filter prepend proc-exec "filter-prepend-go --prefix='[*EXT*]' --extraprefix='[EXT]'"
 listen on em0 tls pki "*" filter { senderscore, rspamd, prepend }
 ```
 * default prefix is `[*EXT*]` if not specified on the CLI  
+* default extraprefix is `[EXT]` if not specified on the CLI  
 Be warned that a too generic prefix could match legitimate wording and thus it won't be added to the Subject
 * option `--encode` forces prefix encoding whether the subject is encoded or not.
 
