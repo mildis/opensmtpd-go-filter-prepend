@@ -12,21 +12,25 @@ import (
 
 var dec *mime.WordDecoder
 var prefix string
-var encprefix string
+var encPrefix string
 var forceEncode bool
 var sessionIndex int
 var opaqueIndex int
+var extraPrefix string
+var encExtraPrefix string
 
 func init() {
 	flag.StringVar(&prefix, "prefix", "[*EXT*]", "Prepend subject with <prefix> if not already present")
 	flag.BoolVar(&forceEncode, "encode", false, "Encode prefix whether subject is encoded or not")
+	flag.StringVar(&extraPrefix, "extraprefix", "[EXT]", "Also detect <extraprefix> within the subject")
 	flag.Parse()
 }
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	dec = new(mime.WordDecoder)
-	encprefix = mime.QEncoding.Encode("utf-8", prefix)
+	encPrefix = mime.QEncoding.Encode("utf-8", prefix)
+	encExtraPrefix = mime.QEncoding.Encode("utf-8", extraPrefix)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -35,9 +39,9 @@ func main() {
 			SetIndexValue(line)
 		} else if strings.HasPrefix(line, "config|ready") {
 			RegisterFilter()
-			log.Println("filter-prepend registered with " + prefix)
+			log.Println("filter-prepend registered with " + prefix + " and extraPrefix " + extraPrefix)
 			if forceEncode {
-				log.Println("filter-prepend will always encode prefix to " + encprefix)
+				log.Println("filter-prepend will always encode prefix to " + encPrefix)
 			}
 		} else {
 			dataSplit := strings.Split(line, "|")
@@ -95,9 +99,9 @@ func ProcessSubject(s []string) string {
 		subject, _ = dec.Decode(rawsub)
 	}
 
-	if !strings.Contains(subject, prefix) {
+	if !strings.Contains(subject, prefix) && !strings.Contains(subject, extraPrefix) {
 		if isEncoded || forceEncode {
-			result = encprefix + " "
+			result = encPrefix + " "
 		} else {
 			result = prefix + " "
 		}
